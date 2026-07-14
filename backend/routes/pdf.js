@@ -1,12 +1,17 @@
 const express = require("express");
+const multer = require("multer");
+const pdfController = require("../controllers/pdfController");
 
 const router = express.Router();
 
-router.post("/pdf-to-word", (req, res) => {
-  res.json({
-    success: true,
-    message: "PDF received successfully!",
-  });
+const upload = multer({
+  dest: "uploads/",
 });
+
+router.post(
+  "/pdf-to-word",
+  upload.single("file"),
+  pdfController.convertPdfToWord
+);
 
 module.exports = router;

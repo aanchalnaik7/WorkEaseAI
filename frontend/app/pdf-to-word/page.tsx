@@ -1,4 +1,5 @@
 import FileUpload from "../../components/FileUpload";
+import Card from "../../components/ui/Card";
 
 export default function PdfToWordPage() {
   return (
@@ -16,9 +17,9 @@ export default function PdfToWordPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-xl p-10">
-          <FileUpload />
-        </div>
+        <Card>
+  <FileUpload />
+</Card>
 
         <div className="grid md:grid-cols-3 gap-6 mt-12">
 
