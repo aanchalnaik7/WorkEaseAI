@@ -11,7 +11,18 @@ async function convertPdfToWord(req, res) {
 
     const result = await pdfService.convert(req.file);
 
-    return res.json(result);
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${result.filename}"`
+    );
+
+    return res.send(result.buffer);
+
   } catch (error) {
     console.error(error);
 

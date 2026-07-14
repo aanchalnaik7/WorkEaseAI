@@ -12,3 +12,7 @@
 
 # Logs
 *.log
+
+# Temporary backend files
+backend/uploads/
+backend/output/

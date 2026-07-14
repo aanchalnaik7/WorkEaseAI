@@ -11,9 +11,7 @@ async function createWord(text) {
     ],
   });
 
-  const buffer = await Packer.toBuffer(doc);
-
-  return buffer;
+  return await Packer.toBuffer(doc);
 }
 
 module.exports = {
