@@ -1,8 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 import PrimaryButton from "./ui/PrimaryButton";
 import Spinner from "./ui/Spinner";
+import { API_BASE_URL } from "../lib/config";
 
 export default function FileUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -16,12 +18,14 @@ export default function FileUpload() {
     if (selectedFile.type !== "application/pdf") {
       setError("Please upload a PDF file.");
       setFile(null);
+      toast.error("Please upload a PDF file.");
       return;
     }
 
     if (selectedFile.size > 10 * 1024 * 1024) {
       setError("Maximum file size is 10 MB.");
       setFile(null);
+      toast.error("Maximum file size is 10 MB.");
       return;
     }
 
@@ -56,6 +60,8 @@ export default function FileUpload() {
     if (inputRef.current) {
       inputRef.current.value = "";
     }
+
+    toast("File removed.");
   }
 
   async function handleConvert() {
@@ -69,7 +75,7 @@ export default function FileUpload() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/pdf-to-word",
+        `${API_BASE_URL}/api/pdf-to-word`,
         {
           method: "POST",
           body: formData,
@@ -97,10 +103,14 @@ export default function FileUpload() {
       window.URL.revokeObjectURL(url);
 
       setStatus("Download started ✅");
+
+      toast.success("Word document downloaded successfully!");
     } catch (err) {
       console.error(err);
+
       setStatus("Conversion failed ❌");
-      alert("Conversion failed.");
+
+      toast.error("Conversion failed.");
     } finally {
       setLoading(false);
     }

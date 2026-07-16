@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const pdfRoutes = require("./routes/pdf");
+const mergeRoutes = require("./routes/merge");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api", pdfRoutes);
+app.use("/api", mergeRoutes);
 
 app.get("/", (req, res) => {
   res.json({
