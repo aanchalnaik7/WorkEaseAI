@@ -15,18 +15,30 @@ export const tools: Tool[] = [
   {
     title: "Merge PDF",
     description: "Combine multiple PDFs into one document.",
-    icon: "📄",
+    icon: "📑",
     href: "/merge-pdf",
+  },
+  {
+    title: "Split PDF",
+    description: "Extract specific pages from a PDF document.",
+    icon: "✂️",
+    href: "/split-pdf",
+  },
+  {
+    title: "Compress PDF",
+    description: "Reduce PDF file size while maintaining quality.",
+    icon: "🗜️",
+    href: "/compress-pdf",
   },
   {
     title: "Remove Background",
     description: "Remove image backgrounds instantly using AI.",
-    icon: "🖼",
+    icon: "🖼️",
   },
   {
     title: "JPG to PNG",
     description: "Convert images between popular formats.",
-    icon: "🖼",
+    icon: "🖼️",
   },
   {
     title: "AI Summarizer",

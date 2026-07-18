@@ -1,13 +1,13 @@
 const express = require("express");
 const upload = require("../middleware/upload");
-const pdfController = require("../controllers/pdfController");
+const splitController = require("../controllers/splitController");
 
 const router = express.Router();
 
 router.post(
-    "/pdf-to-word",
+    "/split-pdf",
     upload.single("file"),
-    pdfController.convertPdfToWord
+    splitController.splitPDF
 );
 
 module.exports = router;

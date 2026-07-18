@@ -1,3 +1,5 @@
+import ToolInfo from "./ToolInfo";
+
 interface ToolLayoutProps {
   title: string;
   description: string;
@@ -10,26 +12,29 @@ export default function ToolLayout({
   children,
 }: ToolLayoutProps) {
   return (
-    <main className="min-h-screen bg-gray-100 py-16 px-6">
-
-      <div className="max-w-5xl mx-auto">
-
-        <div className="text-center mb-12">
-
-          <h1 className="text-5xl font-bold text-blue-600">
+    <main className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-6xl px-6 py-14">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900">
             {title}
           </h1>
 
-          <p className="mt-4 text-xl text-gray-600">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
             {description}
           </p>
-
         </div>
 
-        {children}
+        {/* Upload Section */}
+        <div className="mx-auto mt-10 max-w-3xl">
+          {children}
+        </div>
 
+        {/* Information Cards */}
+        <div className="mt-14">
+          <ToolInfo />
+        </div>
       </div>
-
     </main>
   );
 }

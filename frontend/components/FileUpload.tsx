@@ -1,196 +1,180 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { ChangeEvent, DragEvent, useState } from "react";
 import toast from "react-hot-toast";
-import PrimaryButton from "./ui/PrimaryButton";
-import Spinner from "./ui/Spinner";
-import { API_BASE_URL } from "../lib/config";
 
-export default function FileUpload() {
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+interface FileUploadProps {
+  file: File | null;
+  onFileSelect: (file: File | null) => void;
+}
 
-  const inputRef = useRef<HTMLInputElement>(null);
+export default function FileUpload({
+  file,
+  onFileSelect,
+}: FileUploadProps) {
+  const [dragActive, setDragActive] = useState(false);
 
-  function validate(selectedFile: File) {
+  const validateFile = (selectedFile: File | null) => {
+    if (!selectedFile) return;
+
     if (selectedFile.type !== "application/pdf") {
-      setError("Please upload a PDF file.");
-      setFile(null);
-      toast.error("Please upload a PDF file.");
+      toast.error("Only PDF files are allowed.");
       return;
     }
 
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setError("Maximum file size is 10 MB.");
-      setFile(null);
-      toast.error("Maximum file size is 10 MB.");
-      return;
-    }
+    onFileSelect(selectedFile);
+  };
 
-    setError("");
-    setStatus("");
-    setFile(selectedFile);
-  }
+  const handleFileChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const selectedFile = event.target.files?.[0] || null;
+    validateFile(selectedFile);
+  };
 
-  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const selected = event.target.files?.[0];
-
-    if (selected) {
-      validate(selected);
-    }
-  }
-
-  function handleDrop(event: React.DragEvent<HTMLDivElement>) {
+  const handleDrop = (
+    event: DragEvent<HTMLLabelElement>
+  ) => {
     event.preventDefault();
+    event.stopPropagation();
 
-    const selected = event.dataTransfer.files?.[0];
+    setDragActive(false);
 
-    if (selected) {
-      validate(selected);
+    const selectedFile = event.dataTransfer.files?.[0] || null;
+
+    validateFile(selectedFile);
+  };
+
+  const handleDragOver = (
+    event: DragEvent<HTMLLabelElement>
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (
+    event: DragEvent<HTMLLabelElement>
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    setDragActive(false);
+  };
+
+  const removeFile = () => {
+    onFileSelect(null);
+  };
+
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return `${size} B`;
+
+    if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
     }
-  }
 
-  function removeFile() {
-    setFile(null);
-    setError("");
-    setStatus("");
-
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-
-    toast("File removed.");
-  }
-
-  async function handleConvert() {
-    if (!file) return;
-
-    setLoading(true);
-    setStatus("Uploading PDF...");
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/pdf-to-word`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      setStatus("Converting PDF...");
-
-      if (!response.ok) {
-        throw new Error("Conversion failed");
-      }
-
-      const blob = await response.blob();
-
-      const url = window.URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = file.name.replace(".pdf", ".docx");
-
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-
-      window.URL.revokeObjectURL(url);
-
-      setStatus("Download started ✅");
-
-      toast.success("Word document downloaded successfully!");
-    } catch (err) {
-      console.error(err);
-
-      setStatus("Conversion failed ❌");
-
-      toast.error("Conversion failed.");
-    } finally {
-      setLoading(false);
-    }
-  }
+    return `${(size / (1024 * 1024)).toFixed(2)} MB`;
+  };
 
   return (
-    <div>
-      <div
+    <div className="space-y-5">
+      <label
         onDrop={handleDrop}
-        onDragOver={(e) => e.preventDefault()}
-        onClick={() => inputRef.current?.click()}
-        className="border-2 border-dashed border-blue-300 rounded-2xl p-12 text-center cursor-pointer hover:border-blue-600 transition"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`
+          group
+          flex
+          flex-col
+          items-center
+          justify-center
+          w-full
+          min-h-65
+          rounded-3xl
+          border-2
+          border-dashed
+          cursor-pointer
+          transition-all
+          duration-300
+
+          ${
+            dragActive
+              ? "border-blue-600 bg-blue-100 scale-[1.02]"
+              : "border-blue-300 bg-blue-50/40 hover:border-blue-600 hover:bg-blue-50"
+          }
+        `}
       >
+        <div
+          className="
+            text-6xl
+            transition-transform
+            duration-300
+            group-hover:scale-110
+          "
+        >
+          {dragActive ? "📥" : "📄"}
+        </div>
+
+        <h3 className="mt-5 text-xl font-bold text-gray-800">
+          {dragActive
+            ? "Drop your PDF here"
+            : "Drag & Drop your PDF here"}
+        </h3>
+
+        <p className="mt-2 text-gray-500">
+          or click anywhere to browse
+        </p>
+
+        <p className="mt-5 rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white">
+          Choose PDF
+        </p>
+
         <input
-          ref={inputRef}
           type="file"
           accept=".pdf"
           className="hidden"
-          onChange={handleChange}
+          onChange={handleFileChange}
         />
-
-        <div className="text-5xl">📄</div>
-
-        <h2 className="mt-4 text-2xl font-bold">
-          Drag & Drop your PDF
-        </h2>
-
-        <p className="text-gray-500 mt-2">
-          or click to browse
-        </p>
-      </div>
-
-      {error && (
-        <p className="mt-4 text-red-600 font-medium">
-          {error}
-        </p>
-      )}
+      </label>
 
       {file && (
-        <div className="mt-6 bg-green-50 border border-green-300 rounded-xl p-4 flex justify-between items-center">
-          <div>
-            <p className="font-semibold">
-              {file.name}
-            </p>
+        <div className="rounded-2xl border border-green-200 bg-green-50 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex gap-4">
+              <div className="text-4xl">📄</div>
 
-            <p className="text-gray-500 text-sm">
-              {(file.size / 1024 / 1024).toFixed(2)} MB
-            </p>
+              <div>
+                <h4 className="break-all font-semibold">
+                  {file.name}
+                </h4>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  {formatFileSize(file.size)}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={removeFile}
+              className="
+                rounded-lg
+                bg-red-500
+                px-4
+                py-2
+                text-sm
+                font-semibold
+                text-white
+                transition
+                hover:bg-red-600
+              "
+            >
+              Remove
+            </button>
           </div>
-
-          <button
-            onClick={removeFile}
-            className="text-red-600 hover:underline"
-          >
-            Remove
-          </button>
         </div>
       )}
-
-      {status && (
-        <p className="mt-6 text-center font-medium text-blue-600">
-          {status}
-        </p>
-      )}
-
-      <div className="mt-8">
-        <PrimaryButton
-          disabled={!file || loading}
-          onClick={handleConvert}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2">
-              <Spinner />
-              <span>Converting...</span>
-            </div>
-          ) : (
-            "Convert to Word"
-          )}
-        </PrimaryButton>
-      </div>
     </div>
   );
 }

@@ -1,13 +1,13 @@
 const express = require("express");
 const upload = require("../middleware/upload");
-const pdfController = require("../controllers/pdfController");
+const pdfInfoController = require("../controllers/pdfInfoController");
 
 const router = express.Router();
 
 router.post(
-    "/pdf-to-word",
+    "/pdf-info",
     upload.single("file"),
-    pdfController.convertPdfToWord
+    pdfInfoController.getPdfInfo
 );
 
 module.exports = router;
